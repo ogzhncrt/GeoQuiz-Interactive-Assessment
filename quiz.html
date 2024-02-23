@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Line and Dots Application</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 20px;
+        }
+        #questionsContainer {
+            width: 100%;
+        }
+
+        #questionsContainer h5 {
+            width: 60%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .line {
+                width: 100%;
+                height: 6px; /* Ensure this is enough to be visible */
+                background-color: black; /* Contrast color for visibility */
+                position: relative;
+                margin: 10px 0; /* Add some margin for spacing */
+            }
+
+            .line-container {
+                width: 100%; /* Adjust based on your layout needs */
+                margin-top: 30px;
+                margin-bottom: 30px;
+                position: relative;
+            }
+
+        .dot {
+            width: 2px;
+            height: 20px;
+            background-color: blue;
+            position: absolute;
+            top: -8px;
+        }
+        .dot.click {
+            background-color: red;
+        }
+        .label {
+            position: absolute;
+            top: 10px;
+        }
+        #confirmBtn {
+            display: block;
+            
+            margin: 60px auto;
+        }
+        #resultsPopup {
+            display: none;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #000;
+            z-index: 100;
+        }
+    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div id="questionsContainer">
+    <!-- Questions will be inserted here -->
+</div>
+<button id="confirmBtn" class="btn btn-success" onclick="showResult()">Show Result</button>
+
+
+            <div class="modal" tabindex="-1" id="resultModal">
+               <div class="modal-dialog">
+                  <div class="modal-content">
+                     <div class="modal-header">
+                        <h5 class="modal-title">Results</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                     </div>
+                     <div class="modal-body" id="resultContent">
+                        <p>Modal body text goes here.</p>
+                     </div>
+                     <div class="modal-footer" style="justify-content: space-between;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="copyButton" onClick="copyToClipboard();" class="btn btn-success"><span class="bi-save"></span>&nbsp;Copy to Clipboard</button>
+                     </div>
+                  </div>
+               </div>
+            </div>
+
+            <div class="modal" tabindex="-1" id="formModal" data-bs-backdrop="static" data-bs-keyboard="false">
+               <div class="modal-dialog">
+                  <div class="modal-content">
+                     <div class="modal-header">
+                        <h5 class="modal-title">Before We Proceed</h5>
+                     </div>
+                     <form id="userForm">
+                     <div class="modal-body">
+                        <p>Before we proceed we'll need your details.</p>
+                        
+                            
+                            <div class="mb-3">
+                              <label for="name" class="form-label">Name / Surname *</label>
+                              <input type="text" class="form-control name" id="name" placeholder="John Doe" required>
+                            </div>
+                            
+                        
+                     </div>
+                     <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                     </div>
+                     </form>
+                  </div>
+               </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    let userName = "";
+
+    var formModal = new bootstrap.Modal(document.getElementById('formModal'))
+
+document.addEventListener("DOMContentLoaded", (event) => {
+  
+
+    formModal.show()
+});
+
+
+document.querySelector("#userForm").addEventListener('submit',function(e){
+    e.preventDefault();
+    userName = document.querySelector("#userForm input.name").value;
+    
+    //formModal.hide()
+    //var formModal = new bootstrap.Modal(document.getElementById('formModal'))
+
+    formModal.hide()
+});
+
+
+const specialQuestion = {
+    text: "1. Locate the relative size of the following four areas: Europe, Netherlands, Amazon, and the area of all oceans. This line is scaled from 0 to the total surface area of the world.",
+    answers: [
+        { name: "Netherlands", value: 0.01, color: "orange", userValue:0.00 },
+        { name: "Europe", value: 2.06, color: "yellow", userValue:0.00 },
+        { name: "Asia", value: 8.73, color: "pink", userValue:0.00 },
+        { name: "All oceans", value: 70.78, color: "cyan", userValue:0.00 }
+    ]
+};
+
+const questions = {
+    question2: { text: "2. A total of 148.733.926 km2 of the Earth is covered with land. Indicate on the line where the size of this area is located. This line is scaled from 0 to the total surface area of the world.", correctAnswer: 29.16 },
+    question3: { text: "3.  Climate change has driven an area of 5 million km2 towards desertification. Please draw on the line where the size of this area is located. This line is scaled from 0 to the total surface area of Europe.", correctAnswer: 45 },
+    question4: { text: "4.  Worldwide, an area of 295.574 km2  is protected. Please draw on the line where the size of this area is located.  This line is scaled from 0 to the total surface area of Europe.", correctAnswer: 2.81 },
+    question5: { text: "5.  Plastic garbage covers an area as large as 1.6 million km2. Please draw on the line provided where the size of this area is located.  This line is scaled from 0 to the total surface area of Europe.", correctAnswer: 15.19 }
+};
+
+let lastClickPercent = {};
+let clickRegistered = {};
+
+function createQuestions() {
+    const questionsContainer = document.getElementById('questionsContainer');
+    Object.keys(questions).forEach(question => {
+        const questionText = document.createElement('h5');
+        questionText.textContent = questions[question].text;
+        questionsContainer.appendChild(questionText);
+
+        let lineContainer = document.createElement('div');
+        lineContainer.className = 'line-container';
+        lineContainer.id = question;
+
+        let lineLabelStart = document.createElement('span');
+        lineLabelStart.className = 'label';
+        lineLabelStart.style.left = '0';
+        lineLabelStart.textContent = '0';
+        lineContainer.appendChild(lineLabelStart);
+
+        let lineLabelEnd = document.createElement('span');
+        lineLabelEnd.className = 'label';
+        lineLabelEnd.style.right = '0';
+        lineLabelEnd.textContent = 'Earth Surface';
+        lineContainer.appendChild(lineLabelEnd);
+
+        let line = document.createElement('div');
+        line.className = 'line';
+        line.onclick = function(event) { lineClicked(event, question); };
+        lineContainer.appendChild(line);
+
+        questionsContainer.appendChild(lineContainer);
+    });
+}
+
+function lineClicked(event, question) {
+
+    const line = event.currentTarget;
+
+    if (clickRegistered[question]) {
+        line.querySelector("div.dot.click").remove();
+    }
+
+    const percent = (event.offsetX / line.offsetWidth) * 100;
+    lastClickPercent[question] = Math.round(percent * 10) / 10;
+
+    const dot = document.createElement('div');
+    dot.className = 'dot click';
+    dot.style.left = `${event.offsetX}px`;
+    line.appendChild(dot);
+
+    clickRegistered[question] = true;
+}
+
+function showResult() {
+    let resultText = '';
+    resultText += "<h5 class='mb-3 border-bottom'>"+userName+"</h5>"
+    resultText += "<h6>Question 1 Results</h6>"
+    specialQuestion.answers.map((specialQuestion,key) => {
+        let special_difference = specialQuestion.userValue != 0.00 ? Math.abs(specialQuestion.value - specialQuestion.userValue).toFixed(1) : "N/A";
+        resultText += "<strong>"+specialQuestion.name+": </strong> Difference : "+special_difference+"% | Correct Answer: "+specialQuestion.value+"<br>";
+    });
+
+    resultText += "<hr>";
+
+
+    Object.keys(questions).forEach(question => {
+        const correctAnswer = questions[question].correctAnswer;
+        const difference = lastClickPercent[question] ? Math.abs(correctAnswer - lastClickPercent[question]).toFixed(1) : "N/A";
+        resultText += "<h6>"+question+"</h6>";
+        resultText += `Difference: ${difference}% | Correct Answer: `+correctAnswer+`<hr>`;
+
+        // Optional: Add correct dot for visual feedback
+        if (lastClickPercent[question]) {
+            const line = document.querySelector(`#${question} .line`);
+            const correctDot = document.createElement('div');
+            correctDot.className = 'dot';
+            correctDot.style.left = `calc(${correctAnswer}% - 1px)`;
+            correctDot.style.backgroundColor = 'green';
+            line.appendChild(correctDot);
+        }
+    });
+
+        document.getElementById('resultContent').innerHTML = resultText;
+        //document.getElementById('resultsPopup').style.display = 'block';
+        var myModal = new bootstrap.Modal(document.getElementById('resultModal'))
+        myModal.show()
+    }
+
+    function closePopup() {
+        document.getElementById('resultsPopup').style.display = 'none';
+    }
+
+
+let specialQuestionClicks = 0;
+createSpecialQuestion();
+createQuestions();
+
+
+
+
+function createSpecialQuestion() {
+    const questionsContainer = document.getElementById('questionsContainer');
+    
+    const questionText = document.createElement('h5');
+    questionText.textContent = specialQuestion.text;
+    questionsContainer.appendChild(questionText);
+
+    const questionSub = document.createElement('p');
+    questionSub.classList.add("specialone");
+    //console.log(specialQuestion.answers[specialQuestionClicks])
+    questionSub.innerHTML = "Next guess for: <strong>"+specialQuestion.answers[specialQuestionClicks].name+"</strong>";
+    questionsContainer.appendChild(questionSub);
+
+     const specialButton = document.createElement('button');
+    specialButton.classList.add("specialRemoveButton");
+    specialButton.classList.add("btn");
+    specialButton.classList.add("btn-sm");
+    specialButton.classList.add("btn-warning");
+    specialButton.style.display = "none";
+    //console.log(specialQuestion.answers[specialQuestionClicks])
+    specialButton.innerHTML = "Remove Last Dot";
+    questionsContainer.appendChild(specialButton);
+
+    /*specialButton.onclick = function(event) {
+        specialQuestionClicks--;
+        if (specialQuestionClicks == 0) {
+            document.querySelector(".specialRemoveButton").style.display="none";
+        }
+    };*/
+
+    let lineContainer = document.createElement('div');
+    lineContainer.className = 'line-container';
+    lineContainer.id = "specialQuestion";
+
+    let lineLabelStart = document.createElement('span');
+    lineLabelStart.className = 'label';
+    lineLabelStart.style.left = '0';
+    lineLabelStart.textContent = '0';
+    lineContainer.appendChild(lineLabelStart);
+
+    let lineLabelEnd = document.createElement('span');
+    lineLabelEnd.className = 'label';
+    lineLabelEnd.style.right = '0';
+    lineLabelEnd.textContent = 'Earth Surface';
+    lineContainer.appendChild(lineLabelEnd);
+
+    let line = document.createElement('div');
+    line.className = 'line';
+    // Add click event listener for this specific line
+    line.onclick = function(event) { specialQuestionLineClicked(event); };
+    lineContainer.appendChild(line);
+
+    questionsContainer.appendChild(lineContainer);
+
+}
+
+
+function specialQuestionLineClicked(event) {
+    if (specialQuestionClicks >= 4) {
+        alert("You can only place 4 dots for this question you can remove by clicking one of them. Start from the last one!");
+        return;
+    }
+
+    const line = event.currentTarget;
+    const percent = (event.offsetX / line.offsetWidth) * 100;
+    addDot(line, percent, true, specialQuestion.answers[specialQuestionClicks].name, specialQuestion.answers[specialQuestionClicks].color); 
+
+    // Optionally, add labels to user-placed dots, similar to predefined dots
+    // You might want to add logic here to input or select the label for the dot
+
+    specialQuestion.answers[specialQuestionClicks].userValue = Math.round(percent * 10) / 10;
+
+        
+
+    specialQuestionClicks++;
+    if (specialQuestionClicks > 0) {
+
+        //document.querySelector(".specialRemoveButton").style.display="block";
+    }
+
+    
+
+    if(specialQuestionClicks == 4) {
+        document.querySelector('#questionsContainer p.specialone').innerHTML = "<strong>Completed!</strong>";
+    }
+    else {
+       document.querySelector('#questionsContainer p.specialone').innerHTML = "Next guess for: <strong>"+specialQuestion.answers[specialQuestionClicks].name+"</strong>"; 
+    }
+    
+}
+
+
+function addDot(line, percentX, isSpecial = false, labelText = '', dotColor='red') {
+    const dot = document.createElement('div');
+    dot.className = isSpecial ? 'dot special' : 'dot click'; // Use 'special' class for special question dots
+    dot.style.left = `${percentX}%`;
+    dot.style.backgroundColor = dotColor;
+    if (labelText) {
+        const label = document.createElement('span');
+        label.textContent = labelText;
+        label.style.position = 'absolute';
+        label.style.whiteSpace = 'nowrap';
+        label.style.transform = 'translate(-30%, -20px)';
+        dot.appendChild(label);
+    }
+
+    // Dot click event to remove it
+    dot.onclick = function(event) {
+        event.stopPropagation(); // Prevent triggering line's onclick
+        line.removeChild(dot);
+        if (isSpecial) {
+            specialQuestionClicks--; // Decrement only for special question
+            /*if (specialQuestionClicks < 0) {
+                specialQuestionClicks = 0;
+            }*/
+            document.querySelector('#questionsContainer p.specialone').innerHTML = "Next guess for: <strong>"+specialQuestion.answers[specialQuestionClicks].name+"</strong>";
+        }
+    };
+
+    line.appendChild(dot);
+}
+
+
+function copyToClipboard() {
+    var range = document.createRange();
+    range.selectNode(document.getElementById("resultModal"));
+    window.getSelection().removeAllRanges(); // clear current selection
+    window.getSelection().addRange(range); // to select text
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();// to deselect
+
+  document.getElementById("copyButton").innerHTML = "<span class='bi-check'></span>&nbsp;Copied!";
+}
+
+</script>
+</body>
+</html>
