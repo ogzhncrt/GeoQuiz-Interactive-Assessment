@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Line and Dots Application</title>
+    <title>GeoQuiz Interactive Assessment</title>
     <style>
         body {
             display: flex;
@@ -164,10 +164,10 @@ const specialQuestion = {
 };
 
 const questions = {
-    question2: { text: "2. A total of 148.733.926 km2 of the Earth is covered with land. Indicate on the line where the size of this area is located. This line is scaled from 0 to the total surface area of the world.", correctAnswer: 29.16 },
-    question3: { text: "3.  Climate change has driven an area of 5 million km2 towards desertification. Please draw on the line where the size of this area is located. This line is scaled from 0 to the total surface area of Europe.", correctAnswer: 45 },
-    question4: { text: "4.  Worldwide, an area of 295.574 km2  is protected. Please draw on the line where the size of this area is located.  This line is scaled from 0 to the total surface area of Europe.", correctAnswer: 2.81 },
-    question5: { text: "5.  Plastic garbage covers an area as large as 1.6 million km2. Please draw on the line provided where the size of this area is located.  This line is scaled from 0 to the total surface area of Europe.", correctAnswer: 15.19 }
+    question2: { text: "2. A total of 148.733.926 km2 of the Earth is covered with land. Indicate on the line where the size of this area is located. This line is scaled from 0 to the total surface area of the world.", correctAnswer: 29.16, lineLabelEndText: "Earth Surface" },
+    question3: { text: "3.  Climate change has driven an area of 5 million km2 towards desertification. Please draw on the line where the size of this area is located. This line is scaled from 0 to the total surface area of Europe.", correctAnswer: 45, lineLabelEndText: "Europe’s Surface" },
+    question4: { text: "4.  Worldwide, an area of 295.574 km2  is protected. Please draw on the line where the size of this area is located.  This line is scaled from 0 to the total surface area of Europe.", correctAnswer: 2.81, lineLabelEndText: "Europe’s Surface" },
+    question5: { text: "5.  Plastic garbage covers an area as large as 1.6 million km2. Please draw on the line provided where the size of this area is located.  This line is scaled from 0 to the total surface area of Europe.", correctAnswer: 15.19, lineLabelEndText: "Europe’s Surface"}
 };
 
 let lastClickPercent = {};
@@ -193,7 +193,7 @@ function createQuestions() {
         let lineLabelEnd = document.createElement('span');
         lineLabelEnd.className = 'label';
         lineLabelEnd.style.right = '0';
-        lineLabelEnd.textContent = 'Earth Surface';
+        lineLabelEnd.textContent = questions[question].lineLabelEndText;
         lineContainer.appendChild(lineLabelEnd);
 
         let line = document.createElement('div');
@@ -230,7 +230,7 @@ function showResult() {
     resultText += "<h6>Question 1 Results</h6>"
     specialQuestion.answers.map((specialQuestion,key) => {
         let special_difference = specialQuestion.userValue != 0.00 ? Math.abs(specialQuestion.value - specialQuestion.userValue).toFixed(1) : "N/A";
-        resultText += "<strong>"+specialQuestion.name+": </strong> Difference : "+special_difference+"% | Correct Answer: "+specialQuestion.value+"<br>";
+        resultText += special_difference+"<br>";
     });
 
     resultText += "<hr>";
@@ -240,7 +240,7 @@ function showResult() {
         const correctAnswer = questions[question].correctAnswer;
         const difference = lastClickPercent[question] ? Math.abs(correctAnswer - lastClickPercent[question]).toFixed(1) : "N/A";
         resultText += "<h6>"+question+"</h6>";
-        resultText += `Difference: ${difference}% | Correct Answer: `+correctAnswer+`<hr>`;
+        resultText += `${difference}<hr>`;
 
         // Optional: Add correct dot for visual feedback
         if (lastClickPercent[question]) {
